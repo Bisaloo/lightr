@@ -3,8 +3,6 @@
 #' Finds and imports reflectance/transmittance/absorbance data from spectra
 #' files in a given location.
 #'
-#' @inheritParams lr_parse_generic
-#'
 #' @param where Folder in which files are located (defaults to current working
 #' directory).
 #' @param ext File extension to be searched for, without the "." (defaults to
@@ -21,6 +19,7 @@
 #' @param interpolate Boolean indicated whether spectral data should be
 #' interpolated and pruned at every nanometre. Note that this option can only
 #' work if all input data samples the same wavelengths. Defaults to `TRUE`.
+#' @param ... Arguments passed to individual parsers.
 #'
 #' @details
 #' You can customise the type of parallel processing used by this function with
@@ -46,9 +45,9 @@
 #' head(spcs)
 #'
 lr_get_spec <- function(where = getwd(), ext = "txt", lim = c(300, 700),
-                        decimal = ".", sep = NULL, subdir = FALSE,
-                        subdir.names = FALSE, ignore.case = TRUE,
-                        interpolate = TRUE) {
+                        subdir = FALSE, subdir.names = FALSE,
+                        ignore.case = TRUE, interpolate = TRUE,
+                        ...) {
 
   extension <- paste0("\\.", ext, "$", collapse = "|")
 
@@ -81,12 +80,12 @@ lr_get_spec <- function(where = getwd(), ext = "txt", lim = c(300, 700),
   message(nb_files, " files found; importing spectra:")
 
   if (!interpolate) {
-    gsp <- function(f) {
-      dispatch_parser(f, decimal = decimal, sep = sep)[[1]]
+    gsp <- function(f, ...) {
+      dispatch_parser(f, ...)[[1]]
     }
   } else {
-    gsp <- function(f) {
-      df <- dispatch_parser(f, decimal = decimal, sep = sep)[[1]]
+    gsp <- function(f, ...) {
+      df <- dispatch_parser(f, ...)[[1]]
 
       # Trim now because otherwise, approx() can fill the region of interest
       # with bogus data (e.g., if the data is complete between 200-300nm and
@@ -111,7 +110,7 @@ lr_get_spec <- function(where = getwd(), ext = "txt", lim = c(300, 700),
     tmp <- future_lapply(files, function(x) {
       p()
       tryCatch(
-        gsp(x),
+        gsp(x, ...),
         error = function(e) {
           warning(conditionMessage(e))
           return(NULL)

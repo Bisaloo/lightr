@@ -43,9 +43,10 @@
 #'                 ext = "ProcSpec")
 #' }
 
-lr_get_metadata <- function(where = getwd(), ext = "ProcSpec", sep = NULL,
+lr_get_metadata <- function(where = getwd(), ext = "ProcSpec",
                             subdir = FALSE, subdir.names = FALSE,
-                            ignore.case = TRUE) {
+                            ignore.case = TRUE,
+                            ...) {
 
   extension <- paste0("\\.", ext, "$", collapse = "|")
 
@@ -75,9 +76,9 @@ lr_get_metadata <- function(where = getwd(), ext = "ProcSpec", sep = NULL,
 
   message(nb_files, " files found; importing metadata:")
 
-  gmd <- function(ff) {
+  gmd <- function(ff, ...) {
 
-    dispatch_parser(ff, sep = sep)[[2]]
+    dispatch_parser(ff, ...)[[2]]
 
   }
 
@@ -86,7 +87,7 @@ lr_get_metadata <- function(where = getwd(), ext = "ProcSpec", sep = NULL,
     tmp <- future_lapply(files, function(x) {
       p()
       tryCatch(
-        gmd(x),
+        gmd(x, ...),
         error = function(e) {
           warning(conditionMessage(e))
           return(NULL)
