@@ -23,10 +23,10 @@
 #' @importFrom progressr with_progress progressor
 #'
 #' @export
-lr_convert_tocsv <- function(where = NULL, ext = "txt", decimal = ".",
-                             sep = NULL, subdir = FALSE,
+lr_convert_tocsv <- function(where = NULL, ext = "txt", subdir = FALSE,
                              ignore.case = TRUE, overwrite = FALSE,
-                             metadata = TRUE) {
+                             metadata = TRUE,
+                             ...) {
 
   if (is.null(where)) {
     warning("Please provide a valid location to read and write the files.",
@@ -59,8 +59,9 @@ lr_convert_tocsv <- function(where = NULL, ext = "txt", decimal = ".",
       p()
       tryCatch(
         spec2csv_single(
-          x, decimal = decimal, sep = sep,
-          overwrite = overwrite, metadata = metadata
+          x,
+          overwrite = overwrite, metadata = metadata,
+          ...
         ),
         error = function(e) {
           warning(conditionMessage(e))
@@ -90,9 +91,9 @@ lr_convert_tocsv <- function(where = NULL, ext = "txt", decimal = ".",
 }
 
 #' @noRd
-spec2csv_single <- function(filename, decimal, sep, overwrite, metadata) {
+spec2csv_single <- function(filename, overwrite, metadata, ...) {
 
-  exported <- dispatch_parser(filename, decimal = decimal, sep = sep)
+  exported <- dispatch_parser(filename, ...)
 
   csv_name_data <- paste0(file_path_sans_ext(filename), ".csv")
   csv_name_metadata <- paste0(file_path_sans_ext(filename), "_metadata.csv")
